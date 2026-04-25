@@ -78,14 +78,23 @@ app/src/main/java/com/renzo/moodlesync/
 │   ├── TaskDao.kt        # Acceso a base de datos
 
 │   └── AppDatabase.kt    # Base de datos Room
+
 ├── ui/
+
 │   ├── TaskScreen.kt     # Pantalla principal
+
 │   ├── SplashScreen.kt   # Pantalla de carga
+
 │   ├── NotificationHelper.kt  # Notificaciones
+
 │   └── theme/
+
 │       └── Theme.kt      # Tema de la app
+
 ├── worker/
+
 │   └── SyncWorker.kt     # Sincronización en segundo plano
+
 └── MainActivity.kt       # Actividad principal
 ---
 
