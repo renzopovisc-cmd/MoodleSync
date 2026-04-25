@@ -72,8 +72,11 @@ Para instalarla en iPhone/iPad:
 app/src/main/java/com/renzo/moodlesync/
 
 ├── data/
+
 │   ├── Task.kt           # Modelo de datos
+
 │   ├── TaskDao.kt        # Acceso a base de datos
+
 │   └── AppDatabase.kt    # Base de datos Room
 ├── ui/
 │   ├── TaskScreen.kt     # Pantalla principal
