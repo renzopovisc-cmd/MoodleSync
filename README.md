@@ -70,6 +70,7 @@ Para instalarla en iPhone/iPad:
 
 ## 📁 Estructura del proyecto
 app/src/main/java/com/renzo/moodlesync/
+
 ├── data/
 │   ├── Task.kt           # Modelo de datos
 │   ├── TaskDao.kt        # Acceso a base de datos
