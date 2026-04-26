@@ -1,5 +1,10 @@
 package com.renzo.moodlesync
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -50,9 +55,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Switch
 
 class MainActivity : ComponentActivity() {
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            android.util.Log.d("MainActivity", "Permiso de notificaciones concedido")
+        }
+    }
 
+    private fun pedirPermisoNotificaciones() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pedirPermisoNotificaciones()
         setContent {
             var darkMode by remember { mutableStateOf(false) }
             MoodleSyncTheme(darkTheme = darkMode) {
@@ -203,7 +226,7 @@ class MainActivity : ComponentActivity() {
                                     HorizontalDivider()
                                     Text("MoodleSync", style = MaterialTheme.typography.titleMedium)
                                     Text("Desarrollado por Renzo Povis", style = MaterialTheme.typography.bodySmall)
-                                    Text("Versión 1.0", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Text("Versión 1.5", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                                 }
                             } else {
                                 if (loading) {
@@ -260,7 +283,7 @@ class MainActivity : ComponentActivity() {
             val due = extractField(event, "DTSTART") ?: extractField(event, "DUE") ?: continue
             val description = extractField(event, "DESCRIPTION") ?: ""
             val category = extractField(event, "CATEGORIES") ?: "General"
-            val taskUrl = extractField(event, "URL") ?: ""
+            val taskUrl = extractField(event, "URL") ?: getCursUrl(category)
             tasks.add(Task(
                 id = uid,
                 title = summary,
@@ -284,6 +307,7 @@ class MainActivity : ComponentActivity() {
         return try {
             val clean = dateStr.replace("T", "").replace("Z", "")
             val sdf = java.text.SimpleDateFormat("yyyyMMddHHmmss", java.util.Locale.getDefault())
+            sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
             sdf.parse(clean)?.time ?: 0L
         } catch (e: Exception) { 0L }
     }
@@ -302,6 +326,23 @@ class MainActivity : ComponentActivity() {
             category.contains("COBOL") -> "Módulo Optativo COBOL"
             category.contains("Tutoria") -> "Tutoría"
             else -> category
+        }
+    }
+
+    private fun getCursUrl(category: String): String {
+        return when {
+            category.contains("1709") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4069"
+            category.contains("0373") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4058"
+            category.contains("0483") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4059"
+            category.contains("0484") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4060"
+            category.contains("0485") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4061"
+            category.contains("0487") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4062"
+            category.contains("0488") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4063"
+            category.contains("0491") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4066"
+            category.contains("1665") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4068"
+            category.contains("COBOL") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4073"
+            category.contains("Tutoria") -> "https://www.vidalibarraquer.net/moodle/course/view.php?id=4074"
+            else -> ""
         }
     }
 

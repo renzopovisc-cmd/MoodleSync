@@ -29,10 +29,12 @@ object NotificationHelper {
         }
     }
 
-    fun notifyTask(context: Context, task: Task, message: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.vidalibarraquer.net/moodle"))
+    fun notifyTask(context: Context, task: Task, message: String, franja: Int = 0) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(
+            if (task.url.isNotEmpty()) task.url else "https://www.vidalibarraquer.net/moodle"
+        ))
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, franja, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val manager = context.getSystemService(NotificationManager::class.java)
@@ -44,19 +46,27 @@ object NotificationHelper {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()
-        manager.notify(task.id.hashCode(), notification)
+        manager.notify("${task.id}-$franja".hashCode(), notification)
     }
-
     fun checkAndNotify(context: Context, tasks: List<Task>) {
         val now = System.currentTimeMillis()
-        tasks.forEach { task ->
+        tasks.filter { !it.completada }.sortedByDescending { it.dueDate }.forEach { task ->
             val diff = task.dueDate - now
             val hours = diff / (1000 * 60 * 60)
             when {
-                hours in 0..2 -> notifyTask(context, task, "⚠️ Entrega en menos de 2 horas!")
-                hours in 2..24 -> notifyTask(context, task, "🔴 Entrega en menos de 24 horas")
-                hours in 48..168 -> notifyTask(context, task, "🟡 Entrega en ${hours/24} días")
-                hours in 24..48 -> notifyTask(context, task, "🟠 Entrega mañana")
+                diff < 0 -> notifyTask(context, task, "⚠️ Tarea VENCIDA — entrégala ya", 0)
+                hours < 1 -> notifyTask(context, task, "🚨 ¡Menos de 1 hora para entregar!", 1)
+                hours < 2 -> notifyTask(context, task, "🔴 ¡Solo quedan 2 horas!", 2)
+                hours < 3 -> notifyTask(context, task, "🔴 Quedan menos de 3 horas", 3)
+                hours < 6 -> notifyTask(context, task, "🟠 Quedan menos de 6 horas", 4)
+                hours < 12 -> notifyTask(context, task, "🟠 Quedan menos de 12 horas", 5)
+                hours < 24 -> notifyTask(context, task, "🟡 Entrega mañana — menos de 24h", 6)
+                hours < 48 -> notifyTask(context, task, "🟡 Entrega en 2 días", 7)
+                hours < 72 -> notifyTask(context, task, "🟠 Entrega en 3 días", 8)
+                hours < 96 -> notifyTask(context, task, "🟡 Entrega en 4 días", 9)
+                hours < 120 -> notifyTask(context, task, "🟡 Entrega en 5 días", 10)
+                hours < 144 -> notifyTask(context, task, "🟡 Entrega en 6 días", 11)
+                hours < 168 -> notifyTask(context, task, "🟢 Entrega esta semana", 12)
             }
         }
     }

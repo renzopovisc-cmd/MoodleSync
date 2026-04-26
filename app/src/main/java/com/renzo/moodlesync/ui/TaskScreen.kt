@@ -166,6 +166,19 @@ fun TaskItem(task: Task, onToggleCompletada: (Task) -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
+                val context = androidx.compose.ui.platform.LocalContext.current
+                TextButton(onClick = {
+                    val intent = android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse(
+                            if (task.url.isNotEmpty()) task.url
+                            else "https://www.vidalibarraquer.net/moodle"
+                        )
+                    )
+                    context.startActivity(intent)
+                }) {
+                    Text("🔗 Ver en Moodle", color = Color.White)
+                }
             }
             Checkbox(
                 checked = task.completada,
